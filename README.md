@@ -1,5 +1,5 @@
 # vagrant-evpn-vxlan
-Vagrantfile for playing EVPN-VXLAN using [gobgp](https://github.com/osrg/gobgp) and [goplane](https://github.com/osrg/goplane).
+Vagrantfile for setting up EVPN-VXLAN using [gobgp](https://github.com/osrg/gobgp) and [goplane](https://github.com/osrg/goplane).
 
 ## Topology
 
@@ -16,16 +16,17 @@ Vagrantfile for playing EVPN-VXLAN using [gobgp](https://github.com/osrg/gobgp) 
 +---------------------------------+
 ```
 
-this vagrant file creates 3 virtual macines, which are working as PC router, and inside VMs, netns will created for playing vxlan.
+this vagrant file creates 3 virtual macines, one as PC router, and two inside VMs; netns namespace will created for testing vxlan.
 
-## How to play
+## How to use
 You need to install vagrant before playing vagrant evpn-vxlan.
-This Vagrantfile creates two virtual machine.
+This Vagrantfile creates three virtual machines.
+This is a fork of the original repository @skjune
 
 ## Common
 
 ```
-git clone https://github.com/skjune12/vagrant-evpn-vxlan
+git clone https://github.com/jtatman/vagrant-evpn-vxlan
 cd vagrant-evpn-vxlan
 vagrant up
 ```
@@ -41,7 +42,7 @@ sudo -i
 ~/config/config-interface.sh
 ```
 
-### Running goplane
+### Run goplane
 
 ```bash
 vagrant ssh gobgp1
@@ -60,7 +61,7 @@ sudo -i
 ~/config/config-interface.sh
 ```
 
-### Running goplane
+### Run goplane
 
 ```bash
 vagrant ssh gobgp2
@@ -78,7 +79,7 @@ sudo -i
 ~/config/config-interface.sh
 ```
 
-### Running goplane
+### Run goplane
 
 ```bash
 vagrant ssh gobgp3
@@ -86,7 +87,7 @@ sudo -i
 goplane -f ~/config/multiple-sites.conf
 ```
 
-## Let's play
+## Let's see how things went...
 
 ### Check BGP status
 
