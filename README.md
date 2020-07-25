@@ -22,7 +22,8 @@ this vagrant file creates 3 virtual macines, one as PC router, and two inside VM
 ## How to use
 You need to install vagrant before playing vagrant evpn-vxlan.
 This Vagrantfile creates three virtual machines.
-This is a fork of the original repository @skjune
+This is a fork of the original repository @skjune12
+This version attempts to use the vagrant provider for lxc 
 
 ## Common
 
