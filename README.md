@@ -1,6 +1,7 @@
 # vagrant-evpn-vxlan
 Vagrantfile for setting up EVPN-VXLAN using [gobgp](https://github.com/osrg/gobgp) and [goplane](https://github.com/osrg/goplane).
-
+##
+Uses libvirt/kvm
 
 ## Topology
 
@@ -23,7 +24,7 @@ this vagrant file creates 3 virtual macines, one as PC router, and two inside VM
 You need to install vagrant before playing vagrant evpn-vxlan.
 This Vagrantfile creates three virtual machines.
 This is a fork of the original repository @skjune12
-This version attempts to use the vagrant provider for lxc 
+This version uses libvirt instead of virtualbox
 
 ## Common
 

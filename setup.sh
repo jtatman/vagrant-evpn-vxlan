@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# legacy
 # change repository server to JP
-sed -i.bak -e "s%http://[^ ]\+%http://ftp.jaist.ac.jp/pub/Linux/ubuntu/%g" /etc/apt/sources.list
+#sed -i.bak -e "s%http://[^ ]\+%http://ftp.jaist.ac.jp/pub/Linux/ubuntu/%g" /etc/apt/sources.list
+
+# install software needed over base minimal image
+apt-get update -qq
+apt-get upgrade -y
+apt-get install software-properties-common
 
 # install golang and gobgp dependencies
 add-apt-repository ppa:masterminds/glide -y
