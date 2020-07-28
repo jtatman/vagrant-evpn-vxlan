@@ -1,13 +1,23 @@
 ---
-- hosts: all
+- name: provision OS and Go install
+  hosts: all
   become: yes
   become_method: sudo
+  #import_playbook: goinstall.yml
+  #import_playbook: gobins.yml 
+  vars:
+    GOPATH: /root/go
+    GOROOT: /usr/local/go
+    GOPROXY: https://proxy.golang.org
   tasks:
   - name: Add Repository for Glide Go Package management
     # Add specified repository into sources list.
     apt_repository:
       repo: ppa:masterminds/glide
       state: present
+    register: apt_repo
+    retries: 10
+    until: apt_repo is success
 
   - name: Update OS
     package:
@@ -18,44 +28,80 @@
     package:
      name: ['git', 'golang', 'gcc', 'glide', 'iperf', 'bridge-utils', 'traceroute']
 
-  - name: check go version
-    command: go version
-    register: result
-    changed_when: no
-    ignore_errors: true
+  - name: Wait for /var/lib/dpkg/lock-frontend to be released   
+    shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
 
     # use module for rest?
     # https://github.com/fubarhouse/ansible-role-golang
     # fails at execution of go get because root/vagrant user roles are confused and gopath doesn't set?
-
-  - set_fact:
-      go_path: "{{ lookup('env', 'GOPATH') | default(ansible_env.HOME+'/go', true) }}"
-    when:  result is failed
-
-  - name: go get cobra
-    shell: go get github.com/spf13/cobra
-    environment:
-      GOPATH: "{{ go_path }}"
-    register: cobra
-    when: result is failed
-  - debug: 
-    var: cobra
-
-  - name: go get pretty
-    shell: go get github.com/kr/pretty
-    environment:
-      GOPATH: "{{ go_path }}"
-    register: pretty
-    when: result is failed
+    #  - name: run golang stuff
+    #    script: ./setup.sh 
+    #    register: golang
+    #  - debug: var=golang.stdout_lines
   
-  - debug: 
-    var: pretty
+  - name: Copy gobgp into place
+    copy: 
+      src: ./config/gobgp 
+      dest: /usr/bin/gobgp
+      # validate: gobgp --version
 
-  - name: go get goplane
-    shell: go get github.com/osrg/goplane
-    environment:
-      GOPATH: "{{ go_path }}"
+  - name: Copy gobgpd into place
+    copy:
+      src: ./config/gobgpd
+      dest: /usr/bin/gobgpd
+      # validate: gobgpd --version
+
+  - name: change execute gobgp
+    file: 
+      dest: /usr/bin/gobgp
+      mode: a+x
+
+  - name: change execute gobgpd
+    file:
+      dest: /usr/bin/gobgpd
+      mode: a+x
+
+  - name: copy directory to gpbgp1
+    copy:
+      src: ./config/gobgp1/
+      dest: /home/vagrant/config
+    when: inventory_hostname == "gobgp1"
+  - name: copy directory to gobgp2
+    copy:
+      src: ./config/gobgp2/
+      dest: /home/vagrant/config
+    when: inventory_hostname == "gobgp2"
+  - name: copy directory to gobgp3
+    copy:
+      src: ./config/gobgp3/
+      dest: /home/vagrant/config
+    when: inventory_hostname == "gobgp3"
+  
+  - name: Wait for directory copy  
+    pause: 
+      seconds: 5 
+
+  - name: change execute script
+    file:
+      dest: /home/vagrant/config/config-interface.sh
+      mode: a+x
+  - name: change directory ownership
+    file:
+      path: /home/vagrant/config
+      state: directory
+      owner: vagrant
+      group: vagrant
+      mode: 0755
+
+  - name: configure interfaces
+    become_user: root
+    shell: /home/vagrant/config/config-interface.sh
+    ignore_errors: True
+
+  - name: execute goplane with configuration
+    become_user: root
+    become_flags: -i
+    shell: . /root/.bashrc && goplane -f /home/vagrant/config/multiple-sites.conf &
     register: goplane
-    when: result is failed
-  - debug: 
-    var: goplane
+  - debug: var=goplane.stdout_lines
