@@ -93,7 +93,9 @@ goplane -f ~/config/multiple-sites.conf
 ## Let's see how things went...
 
 ### Check BGP status
-
+```bash
+vagrant ssh gobgp3
+```
 Check whether bgp is established or not.
 
 ```bash

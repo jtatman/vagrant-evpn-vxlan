@@ -7,7 +7,7 @@
 # install software needed over base minimal image
 apt-get update -qq
 apt-get upgrade -y
-apt-get install software-properties-common
+apt-get install software-properties-common python python3
 
 # install golang and gobgp dependencies
 add-apt-repository ppa:masterminds/glide -y

@@ -1,0 +1,61 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Add Repository for Glide Go Package management
+    # Add specified repository into sources list.
+    apt_repository:
+      repo: ppa:masterminds/glide
+      state: present
+
+  - name: Update OS
+    package:
+      name: '*'
+      state: latest
+
+  - name: Install Basic packages
+    package:
+     name: ['git', 'golang', 'gcc', 'glide', 'iperf', 'bridge-utils', 'traceroute']
+
+  - name: check go version
+    command: go version
+    register: result
+    changed_when: no
+    ignore_errors: true
+
+    # use module for rest?
+    # https://github.com/fubarhouse/ansible-role-golang
+    # fails at execution of go get because root/vagrant user roles are confused and gopath doesn't set?
+
+  - set_fact:
+      go_path: "{{ lookup('env', 'GOPATH') | default(ansible_env.HOME+'/go', true) }}"
+    when:  result is failed
+
+  - name: go get cobra
+    shell: go get github.com/spf13/cobra
+    environment:
+      GOPATH: "{{ go_path }}"
+    register: cobra
+    when: result is failed
+  - debug: 
+    var: cobra
+
+  - name: go get pretty
+    shell: go get github.com/kr/pretty
+    environment:
+      GOPATH: "{{ go_path }}"
+    register: pretty
+    when: result is failed
+  
+  - debug: 
+    var: pretty
+
+  - name: go get goplane
+    shell: go get github.com/osrg/goplane
+    environment:
+      GOPATH: "{{ go_path }}"
+    register: goplane
+    when: result is failed
+  - debug: 
+    var: goplane
