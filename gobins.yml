@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    GOPATH: /home/vagrant/go
+    GOROOT: /usr/local/go
+    GOPROXY: https://proxy.golang.org
+  tasks:
+  - name: Set up Goplane (Go) using Glide package manager
+    shell: cd $GOPATH/src/github.com/osrg/goplane && glide install
+    environment:
+      GOPATH: "{{ GOPATH }}"
+
+  - name: Copy gobgp into place
+    copy: 
+      src: ./config/gobgp 
+      dest: /usr/bin/gobgp
+      validate: gobgp --version
+
+  - name: Copy gobgpd into place
+    copy:
+      src: ./config/gobgpd
+      dest: /usr/bin/gobgpd
+      validate: gobgpd --version
+  

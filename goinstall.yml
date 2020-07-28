@@ -1,0 +1,36 @@
+---
+- name: use module to install golang
+  roles: 
+    - fubarhouse.golang
+  vars: 
+    GOPATH: /home/vagrant/go
+    GOROOT: /usr/local/go
+    GOPROXY: https://proxy.golang.org
+    golang_shell_profile: /root/.bash_profile
+    go_install_clean: true
+    go_reget: true
+    go_get:
+    - name: Cobra
+      url: github.com/spf13/cobra
+    - name: Pretty
+      url: github.com/kr/pretty
+    - name: Goplane
+      url: github.com/spf13/goplane
+  tasks:
+    go_install:
+      # repo is the git clone url, ssh or https.
+      repo: https://github.com/spf13/cobra.git
+      # dest is the namespace
+      dest: github.com/spf13/cobra
+      # version refers to a tag, or branch.
+      # version: 2.2.5
+      package: github.com/spf13/cobra
+
+      repo: https://github.com/kr/pretty.git
+      dest: github.com/kr/pretty
+      package: github.com/spf13/pretty
+
+      repo: https://github.com/osrg/goplane.git
+      dest: github.com/osrg/goplane
+      package: github.com/osrg/goplane
+

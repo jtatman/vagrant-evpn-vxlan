@@ -1,0 +1,109 @@
+---
+- hosts: all
+  roles: fubarhouse.golang
+  vars: 
+    golang_shell_profile: /home/vagrant/.bash_profile
+    go_install_clean: true
+    go_reget: true
+    go_version: 1.6.2
+    GOPATH: /home/vagrant/go
+    GOROOT: /usr/bin
+    GOPROXY: https://proxy.golang.org
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Add Repository for Glide Go Package management
+    # Add specified repository into sources list.
+    apt_repository:
+      repo: ppa:masterminds/glide
+      state: present
+
+  - name: Update OS
+    package:
+      name: '*'
+      state: latest
+
+  - name: Install Basic packages
+    package:
+     name: ['git', 'golang', 'gcc', 'glide', 'iperf', 'bridge-utils', 'traceroute']
+
+  - name: check go version
+    command: go version
+    register: result
+    changed_when: no
+    ignore_errors: true
+
+    # use module for rest?
+    # https://github.com/fubarhouse/ansible-role-golang
+    # fails at execution of go get because root/vagrant user roles are confused and gopath doesn't set?
+  - name: Install Cobra (Go)
+    go_install:
+      # repo is the git clone url, ssh or https.
+    - repo: https://github.com/spf13/cobra.git
+      # dest is the namespace
+      dest: github.com/spf13/cobra
+      # version refers to a tag, or branch.
+      # version: 2.2.5
+      package: github.com/spf13/cobra
+
+  - name: Install Pretty (Go)
+    go_install:
+    - repo: https://github.com/kr/pretty.git
+      dest: github.com/kr/pretty
+      package: github.com/spf13/pretty
+
+  - name: Install Goplane (Go) 
+    go_install:
+    - repo: https://github.com/osrg/goplane.git
+      dest: github.com/osrg/goplane
+      package: github.com/osrg/goplane
+
+  - name: Set up Goplane (Go)
+    shell: cd $GOPATH/src/github.com/osrg/goplane && glide install
+    environment:
+      GOPATH: "{{ GOPATH }}"
+
+  - name: Copy gobgp into place
+    copy: 
+      src: ./config/gobgp 
+      dest: /usr/bin/gobgp
+      validate: gobgp --version
+
+  - name: Copy gobgpd into place
+    copy:
+      src: ./config/gobgpd
+      dest: /usr/bin/gobgpd
+      validate: gobgpd --version
+
+
+  - set_fact:
+      go_path: "{{ lookup('env', 'GOPATH') | default(ansible_env.HOME+'/go', true) }}"
+    when:  result is failed
+  
+  - name: go get cobra
+    shell: go get github.com/spf13/cobra
+    environment:
+      GOPATH: "{{ go_path }}"
+    register: cobra
+    when: result is failed
+  - debug: 
+    var: cobra
+
+  - name: go get pretty
+    shell: go get github.com/kr/pretty
+    environment:
+      GOPATH: "{{ go_path }}"
+    register: pretty
+    when: result is failed
+  
+  - debug: 
+    var: pretty
+
+  - name: go get goplane
+    shell: go get github.com/osrg/goplane
+    environment:
+      GOPATH: "{{ go_path }}"
+    register: goplane
+    when: result is failed
+  - debug: 
+    var: goplane

@@ -16,7 +16,7 @@ do
 
     FILENAME=gobgp1to2-overlay-$PKTSIZ.txt
     echo $FILENAME
-    ip netns exec vxlan iperf -c 192.168.1.4 -t 10 -i 1 -l $PKTSIZ | tee $FILENAME
+    ip netns exec vxlan-ns iperf -c 192.168.1.4 -t 10 -i 1 -l $PKTSIZ | tee $FILENAME
 
     FILENAME=gobgp1to3-underlay-$PKTSIZ.txt
     echo $FILENAME
@@ -24,5 +24,5 @@ do
 
     FILENAME=gobgp1to3-overlay-$PKTSIZ.txt
     echo $FILENAME
-    ip netns exec vxlan iperf -c 192.168.1.6 -t 10 -i 1 -l $PKTSIZ | tee $FILENAME
+    ip netns exec vxlan-ns iperf -c 192.168.1.6 -t 10 -i 1 -l $PKTSIZ | tee $FILENAME
 done
